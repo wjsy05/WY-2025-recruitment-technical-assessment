@@ -26,7 +26,7 @@ const app = express();
 app.use(express.json());
 
 // Store your recipes here!
-const cookbook: any = null;
+const cookbook: any = {};
 
 // Task 1 helper (don't touch)
 app.post("/parse", (req:Request, res:Response) => {
@@ -67,9 +67,38 @@ const parse_handwriting = (recipeName: string): string | null => {
 // [TASK 2] ====================================================================
 // Endpoint that adds a CookbookEntry to your magical cookbook
 app.post("/entry", (req:Request, res:Response) => {
-  // TODO: implement me
-  res.status(500).send("not yet implemented!")
+  const entry = JSON.parse(JSON.stringify(req.body)) as cookbookEntry;
+  
+  if (entry.type !== "recipe" && entry.type !== "ingredient") {
+    return res.status(400).send("Invalid type, must be 'recipe' or 'ingredient'.");
+  }
 
+  if (cookbook[entry.name]) {
+    return res.status(400).send("Entry name already exists");
+  }
+
+  if (entry.type === "ingredient") {
+    const ingredientEntry = entry as ingredient;
+    if (ingredientEntry.cookTime < 0) {
+      return res.status(400).send("Cooktime must be >= 0");
+    }
+  }
+
+  if (entry.type === "recipe") {
+    const recipeEntry = entry as recipe;
+    const uniqueItems: string[] = [];
+
+    for (const item of recipeEntry.requiredItems) {
+      if (uniqueItems.includes(item.name)) {
+        return res.status(400).send("Recipe requiredItems must have unique names.");
+      }
+      uniqueItems.push(item.name);
+    }
+  }
+
+  cookbook[entry.name] = entry;
+
+  return res.status(200).send();
 });
 
 // [TASK 3] ====================================================================
