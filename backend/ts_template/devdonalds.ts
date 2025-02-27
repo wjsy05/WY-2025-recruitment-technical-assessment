@@ -45,7 +45,22 @@ app.post("/parse", (req:Request, res:Response) => {
 // [TASK 1] ====================================================================
 // Takes in a recipeName and returns it in a form that 
 const parse_handwriting = (recipeName: string): string | null => {
-  // TODO: implement me
+  recipeName = recipeName.replace(/[-_]+/g, " ");
+
+  recipeName = recipeName.replace(/[^a-zA-Z\s]/g, "");
+
+  recipeName = recipeName.trim().replace(/\s+/g, " ");
+
+  // Words into an array, and change the first letter of word to capital everything else lowercase without changing the array using map
+  recipeName = recipeName
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+  if (recipeName.length <= 0) {
+    return null;
+  }
+
   return recipeName
 }
 
